@@ -1,0 +1,35 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    Projects
+{% endblock %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
+
+{% block content %}
+
+<header>
+    <h2>Projects</h2>
+</header>
+
+<br clear="both">
+
+{% for project in projects %}
+
+    <h3><a href="{{ path('pull-requests', {projectKey: project.key}) }}">{{ project.name }}</a></h3>
+
+{% endfor %}
+
+{% endblock %}

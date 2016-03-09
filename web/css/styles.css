@@ -1,0 +1,96 @@
+/*
+    blue    #337ab7
+    green   #5cb85c
+    red     #d9534f
+    orange  #f0ad4e
+    grey    #777
+
+*/
+
+body {
+    background-color: #e5e5e5;
+    font-family: 'Open Sans', sans-serif;
+}
+
+header h2 {
+    float: left;
+    padding-right: 1rem;
+}
+
+header p {
+    float: right;
+}
+
+.item {
+    display: inline-block;
+    vertical-align: top;
+    padding: 1rem;
+}
+
+.item ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.item li {
+    margin: 0.2rem 0 0 0;
+}
+
+a {
+    color: #f0ad4e;
+    text-decoration: none;
+}
+a.active {
+    font-weight: bold;
+    color: #d9534f;
+}
+a.ACTIVE {
+    color: #5cb85c;
+    font-weight: bold;
+}
+a.FUTURE {
+    color: #337ab7;
+    font-weight: bold;
+}
+a:hover {
+    color: #d9534f;
+}
+
+.prs {
+    list-style: none;
+    margin: 0 1rem 0 1rem;
+    padding: 0;
+}
+.prs li {
+    background-color: #ddd;
+    padding: 0.4rem;
+    border-left: 0.2rem solid #337ab7;
+    border-right: 0.2rem solid #337ab7;
+    border-radius: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+.prs li:hover {
+    background-color: #d4d4d4;
+}
+/*.prs li:last-child {
+    border-bottom: none;
+}*/
+.prs h4 {
+    padding: 0;
+    margin: 0;
+}
+.prs .right {
+    float: right;
+    text-align: right;
+}
+.prs .branches {
+    display: inline-block;
+    margin: 0.8rem 0;
+}
+.prs .branch {
+    margin: 0 0.4rem 0 0.2rem;
+    border: 1px solid #bbb;
+    border-radius: 0.4rem;
+    padding: 0.2rem 0.4rem;
+    color: #337ab7;
+}

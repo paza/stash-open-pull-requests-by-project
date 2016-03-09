@@ -1,0 +1,88 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    Open Pull Requests in {{projectKey}} Project
+{% endblock %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
+
+{% block content %}
+
+<header>
+    <h2>
+        <a href="{{path('projects')}}">Projects</a> / Open Pull Requests in {{projectKey}}
+    </h2>
+    <p>
+        <a title="refresh all caches" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'all'}) }}"><i class="fa fa-refresh"></i></a>
+        Repo cache from {{ cache.repos.time | date("d.m.Y H:i") }}
+        <br>
+        <a title="refresh pull request cache" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'pr'}) }}"><i class="fa fa-refresh"></i></a>
+        Pull Request cache from {{ cache.prs.time | date("d.m.Y H:i") }}
+    </p>
+</header>
+
+<br clear="both">
+
+{% for repo in cache.prs.values %}
+
+    <h3><a href="{{repo.repo.links.self[0].href}}">{{repo.repo.name}} ({{repo.prs | length}})</a></h3>
+
+    <ul class="prs">
+    {% for pr in repo.prs %}
+        <li>
+            <span class="right">
+                {% for reviewer in pr.reviewers %}
+                    <a href="{{reviewer.user.links.self[0].href}}" title="{{reviewer.user.displayName}}"><img src="{{ reviewer.user.emailAddress | gravatar }}"></a>
+                {% endfor %}
+                <br>
+                <a href="{{pr.links.self[0].href}}#pull-request-activity">
+                    <i class="fa fa-comment"></i>
+                    {% if pr.properties.commentCount is defined %}
+                        {{ pr.properties.commentCount }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </a>
+            </span>
+
+            <h4><a href="{{pr.links.self[0].href}}">{{pr.title}}</a></h4>
+
+            <span class="branches">
+                <!-- projects/GRV/repos/ml3k-loadconfig/browse?at=refs%2Fheads%2Ffeature%2Fdude -->
+                <a href="{{ pr.fromRef.repository.links.self[0].href }}?at={{ pr.fromRef.id }}" class="branch">
+                {% if not pr.fromRef.repository.project.key is sameas(pr.toRef.repository.project.key) %}{# -#}
+                    {{pr.fromRef.repository.project.key}}<b>@</b>{# -#}
+                {% endif %}{# -#}
+                {% if not pr.fromRef.repository.project.key is sameas(pr.toRef.repository.project.key) or not pr.fromRef.repository.slug is sameas(pr.toRef.repository.slug) %}{# -#}
+                    {{pr.fromRef.repository.slug}}<b>/</b>{# -#}
+                {% endif %}{# -#}
+                {{pr.fromRef.displayId}}
+                </a>
+                <i class="fa fa-arrow-right"></i>
+                <a href="{{ pr.toRef.repository.links.self[0].href }}?at={{ pr.toRef.id }}" class="branch">{{pr.toRef.displayId}}</a>
+            </span>
+            <br>
+            <a href="{{pr.author.user.links.self[0].href}}">
+                <img src="{{ pr.author.user.emailAddress | gravatarSmall }}">
+                {{pr.author.user.displayName}}
+                {{ (pr.createdDate / 1000) | round(0, 'floor') | date("d.m.Y H:i") }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+
+{% endfor %}
+
+{% endblock %}

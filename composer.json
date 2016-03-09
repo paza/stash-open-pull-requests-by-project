@@ -1,0 +1,54 @@
+{
+    "name": "paza/stash-open-pull-requests-by-project",
+    "license": "MIT",
+    "type": "project",
+    "description": "List all open pull requests within a stash project",
+    "authors": [
+        {
+            "name": "Patrick Zahnd",
+            "email": "pazaaa@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "~5.4",
+        "guzzle/guzzle": "~3.9",
+        "silex/silex": "~1.2",
+        "incenteev/composer-parameter-handler": "^2.1",
+        "symfony/yaml": "^2.7",
+        "deralex/yaml-config-service-provider": "^1.0",
+        "twig/twig": "^1.22",
+        "symfony/twig-bridge": "^2.7",
+        "components/font-awesome": "^4.4"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
+            "rm -rf web/fontawesome && mkdir web/fontawesome",
+            "cp -R vendor/components/font-awesome/css web/fontawesome/",
+            "cp -R vendor/components/font-awesome/fonts web/fontawesome/"
+        ],
+        "post-update-cmd": [
+            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
+            "rm -rf web/fontawesome && mkdir web/fontawesome",
+            "cp -R vendor/components/font-awesome/css web/fontawesome/",
+            "cp -R vendor/components/font-awesome/fonts web/fontawesome/"
+        ]
+    },
+    "extra": {
+        "incenteev-parameters": {
+            "file": "config.yml",
+            "env-map": {
+                "url_stash": "STASH_URL",
+                "url_rest": "STASH_REST_URL",
+                "login_read_user": "STASH_READ_ONLY_USER",
+                "login_read_pass": "STASH_READ_ONLY_PASS"
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Paza\\Provider\\": "src/Provider",
+            "Paza\\Controller\\": "src/Controller"
+        }
+    }
+}

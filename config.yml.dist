@@ -1,0 +1,5 @@
+parameters:
+    url_stash: "https://stash.example.com/"
+    url_rest: "https://stash.example.com/rest/"
+    login_read_user: username
+    login_read_pass: password
