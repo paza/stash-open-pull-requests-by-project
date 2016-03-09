@@ -1,5 +1,5 @@
-JIRAstic
-========
+stash-open-pull-requests-by-project
+===================================
 
 How to use:
 -----------
