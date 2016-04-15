@@ -14,75 +14,100 @@
 
 {% endblock %}
 
-{% block footer %}
-
-{% endblock %}
-
 {% block content %}
 
 <header>
-    <h2>
-        <a href="{{path('projects')}}">Projects</a> / Open Pull Requests in {{projectKey}}
-    </h2>
-    <p>
-        <a title="refresh all caches" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'all'}) }}"><i class="fa fa-refresh"></i></a>
-        Repo cache from {{ cache.repos.time | date("d.m.Y H:i") }}
-        <br>
-        <a title="refresh pull request cache" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'pr'}) }}"><i class="fa fa-refresh"></i></a>
-        Pull Request cache from {{ cache.prs.time | date("d.m.Y H:i") }}
-    </p>
+    <div class="page-header">
+        <div class="row">
+        <div class="col-md-8">
+            <h1>
+                <a href="{{path('projects')}}">Projects</a> / Open Pull Requests in {{projectKey}}
+            </h1>
+        </div>
+        <div class="col-md-4 text-right">
+            <p>
+                <a title="refresh all caches" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'all'}) }}"><i class="fa fa-refresh"></i></a>
+                Repo cache from <time class="time" datetime="{{ cache.repos.time | date('Y-m-d\\TH:i:sP') }}" title="{{ cache.repos.time | date("d. M Y H:i") }}">
+            </p>
+            <p>
+                <a title="refresh pull request cache" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'pr'}) }}"><i class="fa fa-refresh"></i></a>
+                Pull Request cache from <time class="time" datetime="{{ cache.prs.time | date('Y-m-d\\TH:i:sP') }}" title="{{ cache.prs.time | date("d. M Y H:i") }}">
+            </p>
+        </div>
+    </div>
 </header>
 
-<br clear="both">
-
 {% for repo in cache.prs.values %}
+    <div class="soprbp-repo panel panel-default">
+        <div class="panel-heading"><a href="{{repo.repo.links.self[0].href}}">{{repo.repo.name}} ({{repo.prs | length}})</a></div>
 
-    <h3><a href="{{repo.repo.links.self[0].href}}">{{repo.repo.name}} ({{repo.prs | length}})</a></h3>
+        <table class="table">
+            <tr>
+                <th>
+                    PR
+                </th>
+                <th>
+                    Author
+                </th>
+                <th>
+                    Reviewers
+                </th>
+            </tr>
+        {% for pr in repo.prs %}
+            <tr>
+                <td>
+                    <h3>
+                        <a href="{{pr.links.self[0].href}}" title="{{pr.title}}">
+                            #{{pr.id}}: {{pr.title|length > 50 ? pr.title|slice(0, 50) ~ '...' : pr.title }}
+                        </a>
+                        <small>
+                            <!-- projects/GRV/repos/ml3k-loadconfig/browse?at=refs%2Fheads%2Ffeature%2Fdude -->
+                            <a href="{{ pr.fromRef.repository.links.self[0].href }}?at={{ pr.fromRef.id }}" class="branch">
+                                {% set fromRef = '' %}
+                                {% if not pr.fromRef.repository.project.key is sameas(pr.toRef.repository.project.key) %}
+                                    {% set fromRef = fromRef ~ pr.fromRef.repository.project.key ~ "@" %}
+                                {% endif %}
+                                {% if not pr.fromRef.repository.project.key is sameas(pr.toRef.repository.project.key) or not pr.fromRef.repository.slug is sameas(pr.toRef.repository.slug) %}
+                                    {% set fromRef = fromRef ~ pr.fromRef.repository.slug ~ "/" %}
+                                {% endif %}
+                                {% set fromRef = fromRef ~ pr.fromRef.displayId ? pr.fromRef.displayId|length > 30 ? pr.fromRef.displayId|slice(0, 30) ~ '...' : pr.fromRef.displayId %}
 
-    <ul class="prs">
-    {% for pr in repo.prs %}
-        <li>
-            <span class="right">
-                {% for reviewer in pr.reviewers %}
-                    <a href="{{reviewer.user.links.self[0].href}}" title="{{reviewer.user.displayName}}"><img src="{{ reviewer.user.emailAddress | gravatar }}"></a>
-                {% endfor %}
-                <br>
-                <a href="{{pr.links.self[0].href}}#pull-request-activity">
-                    <i class="fa fa-comment"></i>
-                    {% if pr.properties.commentCount is defined %}
-                        {{ pr.properties.commentCount }}
-                    {% else %}
-                        0
-                    {% endif %}
-                </a>
-            </span>
-
-            <h4><a href="{{pr.links.self[0].href}}">{{pr.title}}</a></h4>
-
-            <span class="branches">
-                <!-- projects/GRV/repos/ml3k-loadconfig/browse?at=refs%2Fheads%2Ffeature%2Fdude -->
-                <a href="{{ pr.fromRef.repository.links.self[0].href }}?at={{ pr.fromRef.id }}" class="branch">
-                {% if not pr.fromRef.repository.project.key is sameas(pr.toRef.repository.project.key) %}{# -#}
-                    {{pr.fromRef.repository.project.key}}<b>@</b>{# -#}
-                {% endif %}{# -#}
-                {% if not pr.fromRef.repository.project.key is sameas(pr.toRef.repository.project.key) or not pr.fromRef.repository.slug is sameas(pr.toRef.repository.slug) %}{# -#}
-                    {{pr.fromRef.repository.slug}}<b>/</b>{# -#}
-                {% endif %}{# -#}
-                {{pr.fromRef.displayId}}
-                </a>
-                <i class="fa fa-arrow-right"></i>
-                <a href="{{ pr.toRef.repository.links.self[0].href }}?at={{ pr.toRef.id }}" class="branch">{{pr.toRef.displayId}}</a>
-            </span>
-            <br>
-            <a href="{{pr.author.user.links.self[0].href}}">
-                <img src="{{ pr.author.user.emailAddress | gravatarSmall }}">
-                {{pr.author.user.displayName}}
-                {{ (pr.createdDate / 1000) | round(0, 'floor') | date("d.m.Y H:i") }}
-            </a>
-        </li>
-    {% endfor %}
-    </ul>
-
+                                {{ fromRef }}
+                            </a>
+                            <i class="fa fa-arrow-right"></i>
+                            <a href="{{ pr.toRef.repository.links.self[0].href }}?at={{ pr.toRef.id }}" class="branch"><span class="label label-primary soprbp-toref">
+                                {{ pr.toRef.displayId|length > 30 ? pr.toRef.displayId|slice(0, 30) ~ '...' : pr.toRef.displayId }}
+                            </span></a>
+                            <time class="time" datetime="{{ (pr.createdDate / 1000) | round(0, 'floor') | date('Y-m-d\\TH:i:sP') }}" title="{{ (pr.createdDate / 1000) | round(0, 'floor') | date("d. M Y H:i") }}"></time>
+                            <a href="{{pr.links.self[0].href}}#pull-request-activity">
+                                <span class="label label-default">
+                                    <i class="fa fa-comment"></i>
+                                    {% if pr.properties.commentCount is defined %}
+                                        {{ pr.properties.commentCount }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </span>
+                            </a>
+                        </small>
+                    </h3>
+                </td>
+                <td>
+                    <a href="{{pr.author.user.links.self[0].href}}" title="{{ pr.author.user.displayName }}">
+                        <img src="{{ pr.author.user.emailAddress | gravatar }}">
+                    </a>
+                </td>
+                <td>
+                    {% for reviewer in pr.reviewers %}
+                        <a href="{{reviewer.user.links.self[0].href}}" title="{{reviewer.user.displayName}}"><img src="{{ reviewer.user.emailAddress | gravatar }}"></a>
+                    {% endfor %}
+                </td>
+                <td>
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+    </div>
 {% endfor %}
 
 {% endblock %}
