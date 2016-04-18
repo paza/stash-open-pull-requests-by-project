@@ -1,0 +1,79 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    Branches and Tags for project {{projectKey}}
+{% endblock %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+{% endblock %}
+
+{% block content %}
+
+<header>
+    <div class="page-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>
+                    <a href="{{path('projects')}}">Projects</a> / Branches and Tags for project {{projectKey}}
+                </h1>
+            </div>
+            <div class="col-md-4 text-right">
+                <p>
+                    <a title="refresh all caches" href="{{ path('tags', {projectKey: projectKey, refresh: 'all'}) }}"><i class="fa fa-refresh"></i></a>
+                    Repo cache from <time class="time" datetime="{{ cache.repos.time | date('Y-m-d\\TH:i:sP') }}" title="{{ cache.repos.time | date("d. M Y H:i") }}">
+                </p>
+                <p>
+                    <a title="refresh branches and tags cache" href="{{ path('tags', {projectKey: projectKey, refresh: 'tags'}) }}"><i class="fa fa-refresh"></i></a>
+                    Branches and tags cache from <time class="time" datetime="{{ cache.tags.time | date('Y-m-d\\TH:i:sP') }}" title="{{ cache.tags.time | date("d. M Y H:i") }}">
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+
+{% for repo in cache.tags.values %}
+    <div class="soprbp-repo panel panel-default">
+        <div class="panel-heading">
+            <a href="{{repo.repo.links.self[0].href}}">
+                {{repo.repo.name}} ({{repo.branches | length}} branches, {{repo.tags | length}} tags)
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Branches</h4>
+                <div class="list-group">
+                    {% for branch in repo.branches %}
+                        <a href="{{repo.repo.links.self[0].href}}?at={{ branch.id|url_encode }}" class="list-group-item">
+                            {#<a href="{{ repo.repo.project.links.self[0].href }}/repos/{{ repo.repo.slug }}/commits/{{ branch.latestCommit }}"#}
+                            <span class="badge">{{ branch.latestCommit|slice(0,6) }}</span>
+                            {{ branch.displayId }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4>Tags</h4>
+                <div class="list-group">
+                    {% for tag in repo.tags %}
+                        <a href="{{repo.repo.links.self[0].href}}?at={{ tag.id|url_encode }}" class="list-group-item">
+                            {#<a href="{{ repo.repo.project.links.self[0].href }}/repos/{{ repo.repo.slug }}/commits/{{ tag.latestCommit }}"#}
+                            <span class="badge">{{ tag.latestCommit|slice(0,6) }}</span>
+                            {{ tag.displayId }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endfor %}
+
+{% endblock %}

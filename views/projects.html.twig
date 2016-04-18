@@ -22,17 +22,19 @@
     </div>
 </header>
 
-<div class="list-group">
+<ul class="list-group">
 {% for project in projects %}
-      
-    <a href="{{ path('pull-requests', {projectKey: project.key}) }}" class="list-group-item">
+
+    <li class="list-group-item">
         <h2>{{ project.key }}: {{ project.name }}</h2>
+        <a href="{{ path('pull-requests', {projectKey: project.key}) }}" class="badge">Pull Requests</a>
+        <a href="{{ path('tags', {projectKey: project.key}) }}" class="badge">Branches / Tags</a>
         {% if project.description is defined %}
         <p class="list-group-item-text">{{ project.description }}</p>
         {% endif %}
-    </a>
+    </li>
 
 {% endfor %}
-</div>
+</ul>
 
 {% endblock %}
