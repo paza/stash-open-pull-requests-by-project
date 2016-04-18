@@ -64,6 +64,46 @@ $guzzleRead = function ($url) use ($app) {
 };
 
 /**
+ * Get the cache by project
+ */
+$getCache = function ($cacheFile, $projectKey) {
+    $cache = [];
+
+    if (file_exists($cacheFile)) {
+        $cache = json_decode(file_get_contents($cacheFile), true);
+
+        if (!empty($cache)) {
+            if (!empty($cache['prs'])) {
+                $prCacheAge = time() - $cache['prs']['time'];
+
+                // if pr cache is older than 10 minutes, refresh cache
+                if (60 * 10 < $prCacheAge) {
+                    $cache['prs'] = null;
+                }
+            }
+
+            if (!empty($cache['tags'])) {
+                $tagCacheAge = time() - $cache['tags']['time'];
+
+                // if tags cache is older than 30 minutes, refresh cache
+                if (60 * 30 < $tagCacheAge) {
+                    $cache['tags'] = null;
+                }
+            }
+
+            $repoCacheAge = time() - $cache['repos']['time'];
+
+            // if repo cache is older than 12 hours, refresh cache
+            if (60 * 60 * 12 < $repoCacheAge) {
+                $cache['repos'] = null;
+            }
+        }
+    }
+
+    return $cache;
+};
+
+/**
  * Get open pull requests in project
  *
  * @param Request $request
@@ -88,32 +128,11 @@ $app->get(
  * @param string  $projectKey
  */
 $app->get(
-    '/{projectKey}',
-    function (Request $request, $projectKey) use ($guzzleRead, $app) {
+    '/{projectKey}/pull-requests',
+    function (Request $request, $projectKey) use ($guzzleRead, $getCache, $app) {
 
         $cacheFile = sprintf(__DIR__ . '/../pr-cache/%s.json', $projectKey);
-
-        $cache = null;
-
-        if (file_exists($cacheFile)) {
-            $cache = json_decode(file_get_contents($cacheFile), true);
-
-            if (!empty($cache)) {
-                $prCacheAge = time() - $cache['prs']['time'];
-
-                // if pr cache is older than 10 minutes, refresh cache
-                if (60 * 10 < $prCacheAge) {
-                    $cache['prs'] = null;
-                }
-
-                $repoCacheAge = time() - $cache['repos']['time'];
-
-                // if pr cache is older than 12 hours, refresh cache
-                if (60 * 60 * 12 < $repoCacheAge) {
-                    $cache['repos'] = null;
-                }
-            }
-        }
+        $cache = $getCache($cacheFile, $projectKey);
 
         $hasChanges = false;
 
@@ -183,5 +202,92 @@ $app->get(
     }
 )
 ->bind('pull-requests');
+
+/**
+ * Get open pull requests in project
+ *
+ * @param Request $request
+ * @param string  $projectKey
+ */
+$app->get(
+    '/{projectKey}/tags-branches',
+    function (Request $request, $projectKey) use ($guzzleRead, $getCache, $app) {
+
+        $cacheFile = sprintf(__DIR__ . '/../pr-cache/%s.json', $projectKey);
+        $cache = $getCache($cacheFile, $projectKey);
+
+        $hasChanges = false;
+
+        $refresh = $request->get('refresh');
+
+        if (!in_array($refresh, ['tags', 'all'])) {
+            $refresh = null;
+        }
+
+        if (empty($cache['repos']) || in_array($refresh, ['all'])) {
+            $repos = $guzzleRead(sprintf(
+                'api/1.0/projects/%s/repos?limit=200',
+                $projectKey
+            ));
+
+            $cache['repos'] = [
+                'time' => time(),
+                'values' => $repos['values'],
+            ];
+
+            $hasChanges = true;
+        }
+
+        if (empty($cache['tags']) || in_array($refresh, ['tags', 'all'])) {
+            $repoTags = [];
+
+            foreach ($cache['repos']['values'] as $repo) {
+                $repoKey = $repo['slug'];
+
+                $tags = $guzzleRead(sprintf(
+                    'api/1.0/projects/%s/repos/%s/tags?limit=200',
+                    $projectKey,
+                    $repoKey
+                ));
+
+                $branches = $guzzleRead(sprintf(
+                    'api/1.0/projects/%s/repos/%s/branches?limit=200', // ?details=true to get metadata
+                    $projectKey,
+                    $repoKey
+                ));
+
+                $repoTags[] = [
+                    'repo' => $repo,
+                    'tags' => $tags['values'],
+                    'branches' => $branches['values']
+                ];
+            }
+
+            $cache['tags'] = [
+                'time' => time(),
+                'values' => $repoTags,
+            ];
+
+            $hasChanges = true;
+        }
+
+        if ($hasChanges) {
+            file_put_contents($cacheFile, json_encode($cache));
+
+            // redirect so if the user refreshes the browser
+            // page the refresh url params are not set
+            return $app->redirect($app['url_generator']->generate('tags', [
+                'projectKey' => $projectKey
+            ]));
+        }
+
+        return $app['twig']->render('tags.html.twig', array(
+            'projectKey' => $projectKey,
+            'cache'      => $cache,
+            'parameters' => $app['config']['parameters'],
+        ));
+    }
+)
+->bind('tags');
 
 return $app;

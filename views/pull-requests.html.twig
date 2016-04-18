@@ -19,20 +19,21 @@
 <header>
     <div class="page-header">
         <div class="row">
-        <div class="col-md-8">
-            <h1>
-                <a href="{{path('projects')}}">Projects</a> / Open Pull Requests in {{projectKey}}
-            </h1>
-        </div>
-        <div class="col-md-4 text-right">
-            <p>
-                <a title="refresh all caches" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'all'}) }}"><i class="fa fa-refresh"></i></a>
-                Repo cache from <time class="time" datetime="{{ cache.repos.time | date('Y-m-d\\TH:i:sP') }}" title="{{ cache.repos.time | date("d. M Y H:i") }}">
-            </p>
-            <p>
-                <a title="refresh pull request cache" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'pr'}) }}"><i class="fa fa-refresh"></i></a>
-                Pull Request cache from <time class="time" datetime="{{ cache.prs.time | date('Y-m-d\\TH:i:sP') }}" title="{{ cache.prs.time | date("d. M Y H:i") }}">
-            </p>
+            <div class="col-md-8">
+                <h1>
+                    <a href="{{path('projects')}}">Projects</a> / Open Pull Requests in {{projectKey}}
+                </h1>
+            </div>
+            <div class="col-md-4 text-right">
+                <p>
+                    <a title="refresh all caches" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'all'}) }}"><i class="fa fa-refresh"></i></a>
+                    Repo cache from <time class="time" datetime="{{ cache.repos.time | date('Y-m-d\\TH:i:sP') }}" title="{{ cache.repos.time | date("d. M Y H:i") }}">
+                </p>
+                <p>
+                    <a title="refresh pull request cache" href="{{ path('pull-requests', {projectKey: projectKey, refresh: 'pr'}) }}"><i class="fa fa-refresh"></i></a>
+                    Pull Request cache from <time class="time" datetime="{{ cache.prs.time | date('Y-m-d\\TH:i:sP') }}" title="{{ cache.prs.time | date("d. M Y H:i") }}">
+                </p>
+            </div>
         </div>
     </div>
 </header>
